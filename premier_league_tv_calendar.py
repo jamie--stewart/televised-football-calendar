@@ -5,18 +5,23 @@ from time import sleep
 driver = webdriver.Chrome('/usr/local/bin/chromedriver')
 driver.set_window_size(1120, 550)
 
-#Load the page, scroll to the bottom to force the rest of the games to load (they come in async)
 driver.get('https://www.premierleague.com/broadcast-schedules')
+
+#Scrolling to the bottom of the page makes the rest of the games load
 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-sleep(5)
+
+
+initial_displayed_fixtures = len(driver.find_elements_by_css_selector('li.matchFixtureContainer'))
+
+#Wait until the games are loaded in asynchronously
+current_displayed = initial_displayed_fixtures
+while(current_displayed <= initial_displayed_fixtures):
+    sleep(1)
+    current_displayed = len(driver.find_elements_by_css_selector('li.matchFixtureContainer'))
+    print 'Waiting for games to load...'
+
 
 games = []
-
-
-#TODO: break it up into date sections :|
-
-#Iterate over each game
-
 matchdays = driver.find_elements_by_css_selector('time.date.long')
 game_day_fixtures = driver.find_elements_by_css_selector('time.date.long ~ ul.matchList')
 
@@ -44,10 +49,11 @@ for index, value in enumerate(matchdays):
         gameDetails['time'] = time
         gameDetails['broadcaster'] = broadcaster 
         gameDetails['date'] = matchday_date
-
-        print gameDetails
+        games.append(gameDetails)
 
     
+for game in games:
+    print game
 
 driver.close()
 

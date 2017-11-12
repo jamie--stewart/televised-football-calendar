@@ -1,1 +1,5 @@
+arrow==0.10.0
+-e git+git@github.com:jamie--stewart/ics.py.git@b14932305767392426264277be126a2502ee26a0#egg=ics
+python-dateutil==2.6.1
 selenium==3.6.0
+six==1.11.0

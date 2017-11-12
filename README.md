@@ -1,0 +1,1 @@
+[Installing PIP module from Git](https://pip.pypa.io/en/stable/reference/pip_install/#git)
