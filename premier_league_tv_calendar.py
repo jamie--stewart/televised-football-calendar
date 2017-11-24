@@ -1,60 +1,61 @@
-from selenium import webdriver
-from time import sleep
-
-#Dep: needs to be installed
-driver = webdriver.Chrome('/usr/local/bin/chromedriver')
-driver.set_window_size(1120, 550)
-
-driver.get('https://www.premierleague.com/broadcast-schedules')
-
-#Scrolling to the bottom of the page makes the rest of the games load
-driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+import requests
+from lxml import html
+from user_agent import generate_user_agent
+from ics.icalendar import Calendar, Event
+from ics.alarm import DisplayAlarm
+from datetime import timedelta
+import arrow
+import argparse
 
 
-initial_displayed_fixtures = len(driver.find_elements_by_css_selector('li.matchFixtureContainer'))
+program = argparse.ArgumentParser(description='Generate an .ics file of the televised Premier League fixtures')
+program.add_argument('output_file', help='The absolute path to the output .ics file you wish to place the fixtures in')
+program.add_argument('--alert_minutes', type=int, help='The number of minutes before kick-off that you want an alert')
+args = program.parse_args()
 
-#Wait until the games are loaded in asynchronously
-current_displayed = initial_displayed_fixtures
-while(current_displayed <= initial_displayed_fixtures):
-    sleep(1)
-    current_displayed = len(driver.find_elements_by_css_selector('li.matchFixtureContainer'))
-    print 'Waiting for games to load...'
+headers = {
+    'User-Agent': generate_user_agent(),
+}
 
+
+fixtures_page = requests.get('http://www.live-footballontv.com/live-premier-league-football-on-tv.html', headers=headers)
+html_tree = html.fromstring(fixtures_page.content)
+
+listings_rows = html_tree.xpath('//div[@id="listings"]/div[@class="container"]/div[@class="row-fluid"]')
 
 games = []
-matchdays = driver.find_elements_by_css_selector('time.date.long')
-game_day_fixtures = driver.find_elements_by_css_selector('time.date.long ~ ul.matchList')
 
-print '{} game days found'.format(len(game_day_fixtures))
-for index, value in enumerate(matchdays):
-    matchday_date = matchdays[index].get_attribute('datetime')
-    games_on_day = game_day_fixtures[index].find_elements_by_css_selector('li.matchFixtureContainer')
+match_date = None
+for row in listings_rows:
+    date_elem = row.xpath('./div[contains(@class, "matchdate")]')
+    if date_elem: #Have a new match date
+        match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY')    
+        # print 'Match date {}'.format(match_date.text)
+    else: #This is a game
+        home_team, away_team = [x.strip() for x in row.xpath('./div[contains(@class, "matchfixture")]')[0].text.split(' v ')]
+        hour, minute = row.xpath('./div[contains(@class, "kickofftime")]')[0].text.split(':')
+        kick_off = match_date.replace(hour=int(hour), minute=int(minute))
+        channel = 'Sky Sports' if 'sky' in row.xpath('./div[contains(@class, "channels")]')[0].text.lower() else 'BT Sport'
+        game = {
+            'home_team': home_team,
+            'away_team': away_team,
+            'kick_off': kick_off,
+            'channel': channel
+        }
+        games.append(game)       
 
-    for gameElem in games_on_day:
-        gameDetails = {}
+calendar = Calendar()
 
-        teamsElems = gameElem.find_elements_by_css_selector('span.teamName')
-        teams = {}
-        teams['home'] = teamsElems[0].get_property('innerText')
-        teams['away'] = teamsElems[1].get_property('innerText')
-        time = gameElem.find_element_by_css_selector('time').get_property('innerText')
-        broadcasterElem = gameElem.find_element_by_css_selector('span.broadcaster > span')
-        if ('SKY' in broadcasterElem.get_attribute('class')):
-            broadcaster = 'SKY Sports'
-        elif ('BT' in broadcasterElem.get_attribute('class')):
-            broadcaster = 'BT Sport'
-        else:
-            raise ValueError('expected broadcaster to be BT or SKY')
-        gameDetails['teams'] = teams
-        gameDetails['time'] = time
-        gameDetails['broadcaster'] = broadcaster 
-        gameDetails['date'] = matchday_date
-        games.append(gameDetails)
-
-    
 for game in games:
-    print game
+    event = Event()
+    event.name = '{} vs {}'.format(game['home_team'], game['away_team'])
+    start = game['kick_off']
+    event.begin = start
+    event.end = start.shift(hours=+2)
+    if args['alert_minutes']:
+        alarm = DisplayAlarm(trigger=timedelta(minutes=args[alert_minutes]))
+        event.alarms.add(alarm)
+    calendar.events.add(event)
 
-driver.close()
-
-
+with open(args['output_file'], 'w') as ics_file:
+    ics_file.writelines(calendar)
