@@ -17,7 +17,6 @@ headers = {
     'User-Agent': generate_user_agent(),
 }
 
-
 fixtures_page = requests.get('http://www.live-footballontv.com/live-premier-league-football-on-tv.html', headers=headers)
 html_tree = html.fromstring(fixtures_page.content)
 
@@ -52,10 +51,10 @@ for game in games:
     start = game['kick_off']
     event.begin = start
     event.end = start.shift(hours=+2)
-    if args['alert_minutes']:
-        alarm = DisplayAlarm(trigger=timedelta(minutes=args[alert_minutes]))
+    if args.alert_minutes:
+        alarm = DisplayAlarm(trigger=timedelta(minutes=args.alert_minutes))
         event.alarms.add(alarm)
     calendar.events.add(event)
 
-with open(args['output_file'], 'w') as ics_file:
+with open(args.output_file, 'w') as ics_file:
     ics_file.writelines(calendar)
