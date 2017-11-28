@@ -51,6 +51,7 @@ for game in games:
     start = game['kick_off']
     event.begin = start
     event.end = start.shift(hours=+2)
+    event.location = game['channel']
     if args.alert_minutes:
         alarm = DisplayAlarm(trigger=timedelta(minutes=args.alert_minutes))
         event.alarms.add(alarm)
