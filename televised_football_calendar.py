@@ -1,3 +1,5 @@
+#TODO: Handle no fixtures being present! Error
+
 import requests
 from lxml import html
 from user_agent import generate_user_agent
@@ -6,22 +8,26 @@ from ics.alarm import DisplayAlarm
 from datetime import timedelta
 import arrow
 import argparse
-
+import datetime
+import sys
+import os
+import csv
 
 program = argparse.ArgumentParser(description='Generate an .ics file of the televised Premier League fixtures')
 program.add_argument('output_file', help='The absolute path to the output .ics file you wish to place the fixtures in')
 program.add_argument('--alert_minutes', type=int, help='The number of minutes before kick-off that you want an alert')
-args = program.parse_args()
 
 headers = {
     'User-Agent': generate_user_agent(),
 }
 
-competitions = [
-    ("Premier League" , "http://www.live-footballontv.com/live-premier-league-football-on-tv.html"),
-    ("FA Cup", "http://www.live-footballontv.com/live-fa-cup-football-on-tv.html"),
-    ("Champions League" , "http://www.live-footballontv.com/live-champions-league-football-on-tv.html")
-]
+SRC_DIR = os.path.dirname(sys.argv[0])
+log_file = os.path.join(SRC_DIR, 'output.log')
+sys.stdout = open(log_file, 'a')
+
+def formatted_datetime():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
 
 def get_fixtures_for_competition(competition_name, fixtures_page):
     fixtures_page = requests.get(fixtures_page, headers=headers)
@@ -33,8 +39,11 @@ def get_fixtures_for_competition(competition_name, fixtures_page):
 
     match_date = None
     for row in listings_rows:
+
         date_elem = row.xpath('./div[contains(@class, "matchdate")]')
         if date_elem: #Have a new match date
+            if 'No Upcoming TV Fixtures' in date_elem[0].text:
+                raise ValueError('No games for competition {}'.format(competition_name))
             match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY')    
         else: #This is a game
             home_team, away_team = [x.strip() for x in row.xpath('./div[contains(@class, "matchfixture")]')[0].text.split(' v ')]
@@ -77,10 +86,25 @@ def generate_calendar_for_games(games_array):
     
     return calendar
 
-games = []
-for competition_name, competition_url in competitions:
-    games.extend(get_fixtures_for_competition(competition_name, competition_url))
+if __name__ == '__main__':
+    
+    args = program.parse_args()
+    games = []
+
+    competitions_file = os.path.join(SRC_DIR, 'competitions.csv')
+    with open (competitions_file, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            try:
+                current_length = len(games)
+                games.extend(get_fixtures_for_competition(row['NAME'], row['URL']))
+                print '{} Got {} games for {}'.format(formatted_datetime(), len(games) - current_length, row['NAME'])
+            except ValueError:    
+                print '{} Could not get games for {}'.format(formatted_datetime(), row['NAME'])
 
 
-with open(args.output_file, 'w') as ics_file:
-    ics_file.writelines(generate_calendar_for_games(games))
+
+    with open(args.output_file, 'w') as ics_file:
+        print '{} Writing games to {}'.format(formatted_datetime(), os.path.abspath(args.output_file))
+        ics_file.writelines(generate_calendar_for_games(games))
