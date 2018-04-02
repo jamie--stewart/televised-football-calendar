@@ -46,8 +46,8 @@ def get_fixtures_for_competition(fixtures_url):
                 print 'No games for competition {}'.format(fixtures_url)
                 return games
 
-            match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY')    
-            
+            match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY', tzinfo='Europe/London')    
+
         else: #This is a game
             fixture = ''
             try:
