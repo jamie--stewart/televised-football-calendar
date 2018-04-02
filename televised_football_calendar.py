@@ -47,9 +47,8 @@ def get_fixtures_for_competition(fixtures_url):
                 return games
 
             match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY')    
-
-        else: #This is a game
             
+        else: #This is a game
             fixture = ''
             try:
                 home_team, away_team = [x.strip() for x in row.xpath('./div[contains(@class, "matchfixture")]')[0].text.split(' v ')]
@@ -83,11 +82,8 @@ def get_fixtures_for_competition(fixtures_url):
                 'channel': channel,
                 'competition': competition
             }
-
             games.append(game)  
 
-
-    
     return games
 
 def generate_calendar_for_games(games_array):
