@@ -1,5 +1,3 @@
-#TODO: Handle no fixtures being present! Error
-
 import requests
 from lxml import html
 from user_agent import generate_user_agent
@@ -12,6 +10,8 @@ import datetime
 import sys
 import os
 import csv
+import unicodedata
+
 
 program = argparse.ArgumentParser(description='Generate an .ics file of the televised Premier League fixtures')
 program.add_argument('output_file', help='The absolute path to the output .ics file you wish to place the fixtures in')
@@ -29,8 +29,8 @@ def formatted_datetime():
     return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def get_fixtures_for_competition(competition_name, fixtures_page):
-    fixtures_page = requests.get(fixtures_page, headers=headers)
+def get_fixtures_for_competition(fixtures_url):
+    fixtures_page = requests.get(fixtures_url, headers=headers)
     html_tree = html.fromstring(fixtures_page.content)     
 
     listings_rows = html_tree.xpath('//div[@id="listings"]/div[@class="container"]/div[@class="row-fluid"]')
@@ -43,12 +43,30 @@ def get_fixtures_for_competition(competition_name, fixtures_page):
         date_elem = row.xpath('./div[contains(@class, "matchdate")]')
         if date_elem: #Have a new match date
             if 'No Upcoming TV Fixtures' in date_elem[0].text:
-                raise ValueError('No games for competition {}'.format(competition_name))
+                print 'No games for competition {}'.format(fixtures_url)
+                return games
+
             match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY')    
+
         else: #This is a game
-            home_team, away_team = [x.strip() for x in row.xpath('./div[contains(@class, "matchfixture")]')[0].text.split(' v ')]
+            
+            fixture = ''
+            try:
+                home_team, away_team = [x.strip() for x in row.xpath('./div[contains(@class, "matchfixture")]')[0].text.split(' v ')]
+                fixture = '{} vs {}'.format(home_team, away_team)
+            except ValueError:
+                if row.xpath('./div[contains(@class, "matchfixture")]')[0].text.strip() == 'TBC':
+                    fixture = 'TBC'
+                else:
+                    raise ValueError('Could not parse format of \'matchfixture\' element')
+
             hour, minute = row.xpath('./div[contains(@class, "kickofftime")]')[0].text.split(':')
+            
             kick_off = match_date.replace(hour=int(hour), minute=int(minute))
+
+            #Seem to have &nbsp; characters in their text
+            competition = row.xpath('./div[contains(@class, "competition")]')[0].text.strip().encode('ascii', 'ignore')
+            
             channel_text = row.xpath('./div[contains(@class, "channels")]')[0].text.lower()
             if 'sky' in channel_text:
                 channel = 'Sky Sports'
@@ -58,14 +76,17 @@ def get_fixtures_for_competition(competition_name, fixtures_page):
                 channel = 'BT Sport'
             else:
                 raise ValueError('Television channel not recognised: {}'.format(channel_text))
+            
             game = {
-                'home_team': home_team,
-                'away_team': away_team,
+                'fixture': fixture,
                 'kick_off': kick_off,
                 'channel': channel,
-                'competition': competition_name
+                'competition': competition
             }
+
             games.append(game)  
+
+
     
     return games
 
@@ -74,7 +95,7 @@ def generate_calendar_for_games(games_array):
 
     for game in games:
         event = Event()
-        event.name = '{} vs {} ({})'.format(game['home_team'], game['away_team'], game['competition'])
+        event.name = '{} ({})'.format(game['fixture'], game['competition'])
         start = game['kick_off']
         event.begin = start
         event.end = start.shift(hours=+2)
@@ -96,14 +117,9 @@ if __name__ == '__main__':
         reader = csv.DictReader(csvfile)
 
         for row in reader:
-            try:
-                current_length = len(games)
-                games.extend(get_fixtures_for_competition(row['NAME'], row['URL']))
-                print '{} Got {} games for {}'.format(formatted_datetime(), len(games) - current_length, row['NAME'])
-            except ValueError:    
-                print '{} Could not get games for {}'.format(formatted_datetime(), row['NAME'])
-
-
+            current_length = len(games)
+            games.extend(get_fixtures_for_competition(row['URL']))
+            print '{} Got {} games for {}'.format(formatted_datetime(), len(games) - current_length, row['NAME'])
 
     with open(args.output_file, 'w') as ics_file:
         print '{} Writing games to {}'.format(formatted_datetime(), os.path.abspath(args.output_file))
