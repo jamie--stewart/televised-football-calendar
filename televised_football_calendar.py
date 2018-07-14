@@ -60,7 +60,11 @@ def get_fixtures_for_competition(fixtures_url):
                 else:
                     raise ValueError('Could not parse format of \'matchfixture\' element')
 
-            hour, minute = row.xpath('./div[contains(@class, "kickofftime")]')[0].text.split(':')
+            kickoff_time_text = row.xpath('./div[contains(@class, "kickofftime")]')[0].text
+
+            if 'TBC' in kickoff_time_text:
+                continue
+            hour, minute = kickoff_time_text.split(':')
             
             kick_off = match_date.replace(hour=int(hour), minute=int(minute))
 
