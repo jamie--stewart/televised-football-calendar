@@ -22,14 +22,15 @@ headers = {
 }
 
 SRC_DIR = os.path.dirname(sys.argv[0])
-log_file = os.path.join(SRC_DIR, 'output.log')
-sys.stdout = open(log_file, 'a')
 
 def formatted_datetime():
     return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 def get_fixtures_for_competition(fixtures_url):
+
+    print 'Getting games for competition: {}'.format(fixtures_url)
+
     fixtures_page = requests.get(fixtures_url, headers=headers)
     html_tree = html.fromstring(fixtures_page.content)     
 
@@ -73,6 +74,12 @@ def get_fixtures_for_competition(fixtures_url):
                 channel = 'BBC'
             elif 'bt sport' in channel_text:
                 channel = 'BT Sport'
+            elif 'itv' in channel_text:
+                channel = 'ITV'
+            elif 'tbc' in channel_text:
+                channel = 'TBC'
+            elif 'premier sports' in channel_text:
+                channel = 'Premier Sports'
             else:
                 raise ValueError('Television channel not recognised: {}'.format(channel_text))
             
