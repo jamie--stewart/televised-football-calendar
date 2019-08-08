@@ -90,6 +90,8 @@ def get_fixtures_for_competition(fixtures_url):
                 channel = 'Amazon Prime'
             elif 's4c facebook' in channel_text:
                 channel = 'S4C Facebook'
+            elif 'rangers tv' in channel_text:
+                channel = 'Rangers TV'
             else:
                 raise ValueError('Television channel not recognised: {}'.format(channel_text))
             
