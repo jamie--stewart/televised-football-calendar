@@ -92,6 +92,8 @@ def get_fixtures_for_competition(fixtures_url):
                 channel = 'S4C Facebook'
             elif 'rangers tv' in channel_text:
                 channel = 'Rangers TV'
+            elif 'celtic' in channel_text:
+                channel = 'Celtic TV'
             else:
                 raise ValueError('Television channel not recognised: {}'.format(channel_text))
             
