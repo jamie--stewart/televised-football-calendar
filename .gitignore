@@ -33,3 +33,10 @@ Temporary Items
 .env
 
 *.log
+
+__pycache__
+.python-version
+*.pyc
+
+.vscode
+
