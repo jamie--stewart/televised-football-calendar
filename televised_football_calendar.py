@@ -1,3 +1,4 @@
+# TODO Convert to Beautiful Soup 4
 #  Generate a football calendar
 from lxml import html
 from user_agent import generate_user_agent
@@ -75,7 +76,8 @@ def get_fixtures_for_competition(fixtures_url):
             kick_off = match_date.replace(hour=int(hour), minute=int(minute))
 
             # Seem to have &nbsp; characters in their text
-            competition = row.xpath('./div[contains(@class, "competition")]')[0].text.strip()
+            # ICS files are ascii-encoded
+            competition = row.xpath('./div[contains(@class, "competition")]')[0].text.strip().encode('ascii', 'ignore')
 
             channel_text = row.xpath('./div[contains(@class, "channels")]')[0].text.lower()
             if 'sky' in channel_text:
