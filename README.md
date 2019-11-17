@@ -10,13 +10,9 @@
 
 * Use:
 
-`python premier_league_tv_calendar.py <output_ics> [--alert_minutes <mins>]`
+`python premier_league_tv_calendar.py <output_dir> [--alert_minutes <mins>]`
 
 Where:
 
-* `<output_ics>` is the *absolute* path to the .ics file you want to generate
+* `<output_dir>` is the *absolute* path to the directory you want to place each competition's .ics file
 * `--alert_minutes <mins>` (optional) is the number of minutes before kick-off that you would like an alert of the game
-
-## Misc.
-
-[Installing PIP module from Git](https://pip.pypa.io/en/stable/reference/pip_install/#git)
