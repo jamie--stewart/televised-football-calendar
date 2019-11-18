@@ -77,7 +77,7 @@ def get_fixtures_for_competition(fixtures_url):
 
             # Seem to have &nbsp; characters in their text
             # ICS files are ascii-encoded
-            competition = row.xpath('./div[contains(@class, "competition")]')[0].text.strip().encode('ascii', 'ignore')
+            competition = row.xpath('./div[contains(@class, "competition")]')[0].text.strip().encode('ascii', 'ignore').decode('ascii')
 
             channel_text = row.xpath('./div[contains(@class, "channels")]')[0].text.lower()
             if 'sky' in channel_text:
