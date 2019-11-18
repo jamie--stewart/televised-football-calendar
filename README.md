@@ -10,7 +10,7 @@
 
 * Use:
 
-`python premier_league_tv_calendar.py <output_dir> [--alert_minutes <mins>]`
+`python televised_football_calendar.py <output_dir> [--alert_minutes <mins>]`
 
 Where:
 
