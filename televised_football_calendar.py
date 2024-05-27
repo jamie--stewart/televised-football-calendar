@@ -41,33 +41,36 @@ def get_fixtures_for_competition(fixtures_url):
     fixtures_page = requests.get(fixtures_url, headers=headers)
     html_tree = html.fromstring(fixtures_page.content)
 
-    listings_rows = html_tree.xpath('//div[@id="listings"]/div[@class="container"]/div[@class="row-fluid"]')
+    listings_rows = html_tree.xpath('//div[@class="fixture" or @class="fixture-date"]')
 
     games = []
 
     match_date = None
     for row in listings_rows:
-
-        date_elem = row.xpath('./div[contains(@class, "matchdate")]')
-        if date_elem:  # Have a new match date
-            if 'No Upcoming TV Fixtures' in date_elem[0].text:
+        if row.attrib['class'] == 'fixture-date':  # Have a new match date
+            if 'No Upcoming TV Fixtures' in row.text:
                 print(f'No games for competition {fixtures_url}')
                 return games
 
-            match_date = arrow.get(date_elem[0].text, 'dddd Do MMMM YYYY', tzinfo='Europe/London')
+            match_date = arrow.get(row.text, 'dddd Do MMMM YYYY', tzinfo='Europe/London')
 
         else:  # This is a game
             fixture = ''
+            
+            teams_raw = row.xpath('//div[@class="fixture__teams"]')[0].text
             try:
-                home_team, away_team = [x.strip() for x in row.xpath('./div[contains(@class, "matchfixture")]')[0].text.split(' v ')]
+                home_team, away_team = [team.strip() for team in teams_raw.split(' v ')]
                 fixture = f'{home_team} vs {away_team}'
             except ValueError:
-                if row.xpath('./div[contains(@class, "matchfixture")]')[0].text.strip() == 'TBC':
+                if teams_raw.strip() == 'TBC':
                     fixture = 'TBC'
                 else:
-                    raise ValueError('Could not parse format of \'matchfixture\' element')
+                    raise ValueError('Could not parse format of \'fixture__teams\' element')
 
-            kickoff_time_text = row.xpath('./div[contains(@class, "kickofftime")]')[0].text
+        #     time_elem = row.xpath('./div[@class="fixture__time"]')
+        # time_raw = time_elem[0].text
+
+            kickoff_time_text = row.xpath('//div[@class="fixture__time"]')[0].text
 
             if 'TBC' in kickoff_time_text:
                 continue
@@ -77,33 +80,34 @@ def get_fixtures_for_competition(fixtures_url):
 
             # Seem to have &nbsp; characters in their text
             # ICS files are ascii-encoded
-            competition = row.xpath('./div[contains(@class, "competition")]')[0].text.strip().encode('ascii', 'ignore').decode('ascii')
+            competition = row.xpath('//div[@class="fixture__competition"]')[0].text.strip().encode('ascii', 'ignore').decode('ascii')
 
-            channel_text = row.xpath('./div[contains(@class, "channels")]')[0].text.lower()
-            if 'sky' in channel_text:
+            channels_elem = row.xpath('//div[@class="fixture__channel"]')[0]
+            channels_text_raw = ' | '.join(channels_elem.itertext()).lower()
+            if 'sky' in channels_text_raw:
                 channel = 'Sky Sports'
-            elif 'bbc' in channel_text:
+            elif 'bbc' in channels_text_raw:
                 channel = 'BBC'
-            elif 'bt sport' in channel_text:
-                channel = 'BT Sport'
-            elif 'itv' in channel_text:
+            elif 'tnt sports' in channels_text_raw:
+                channel = 'TNT Sports'
+            elif 'itv' in channels_text_raw:
                 channel = 'ITV'
-            elif 'tbc' in channel_text:
+            elif 'tbc' in channels_text_raw:
                 channel = 'TBC'
-            elif 'premier' in channel_text:
+            elif 'premier' in channels_text_raw:
                 channel = 'Premier Sports'
-            elif 'eleven' in channel_text:
+            elif 'eleven' in channels_text_raw:
                 channel = 'Eleven Sports'
-            elif 'amazon prime video' in channel_text:
+            elif 'amazon prime video' in channels_text_raw:
                 channel = 'Amazon Prime'
-            elif 's4c facebook' in channel_text:
+            elif 's4c facebook' in channels_text_raw:
                 channel = 'S4C Facebook'
-            elif 'rangers tv' in channel_text:
+            elif 'rangers tv' in channels_text_raw:
                 channel = 'Rangers TV'
-            elif 'celtic' in channel_text:
+            elif 'celtic' in channels_text_raw:
                 channel = 'Celtic TV'
             else:
-                raise ValueError(f'Television channel not recognised: {channel_text}')
+                raise ValueError(f'Television channel not recognised: {channels_text_raw}')
 
             game = {
                 'fixture': fixture,
@@ -144,6 +148,7 @@ if __name__ == '__main__':
 
         for row in reader:
             games = get_fixtures_for_competition(row['URL'])
+            # TODOJ: Convert to a proper logger
             print(f'{_formatted_datetime()} Got {len(games)} games for {row["NAME"]}')
 
             output_path = _output_path(row['NAME'], args.output_dir)
