@@ -16,7 +16,7 @@ import csv
 
 program = argparse.ArgumentParser(description='Generate an .ics file of the televised Premier League fixtures')
 program.add_argument('output_dir', help='The absolute path to the directory to place the .ics files in')
-program.add_argument('--alert_minutes', type=int, help='The number of minutes before kick-off that you want an alert')
+program.add_argument('--alert-minutes', type=int, help='The number of minutes before kick-off that you want an alert')
 
 headers = {
     'User-Agent': generate_user_agent(),
@@ -57,7 +57,7 @@ def get_fixtures_for_competition(fixtures_url):
         else:  # This is a game
             fixture = ''
             
-            teams_raw = row.xpath('//div[@class="fixture__teams"]')[0].text
+            teams_raw = row.xpath('./div[@class="fixture__teams"]')[0].text
             try:
                 home_team, away_team = [team.strip() for team in teams_raw.split(' v ')]
                 fixture = f'{home_team} vs {away_team}'
@@ -70,7 +70,7 @@ def get_fixtures_for_competition(fixtures_url):
         #     time_elem = row.xpath('./div[@class="fixture__time"]')
         # time_raw = time_elem[0].text
 
-            kickoff_time_text = row.xpath('//div[@class="fixture__time"]')[0].text
+            kickoff_time_text = row.xpath('./div[@class="fixture__time"]')[0].text
 
             if 'TBC' in kickoff_time_text:
                 continue
@@ -80,9 +80,9 @@ def get_fixtures_for_competition(fixtures_url):
 
             # Seem to have &nbsp; characters in their text
             # ICS files are ascii-encoded
-            competition = row.xpath('//div[@class="fixture__competition"]')[0].text.strip().encode('ascii', 'ignore').decode('ascii')
+            competition = row.xpath('./div[@class="fixture__competition"]')[0].text.replace('\xa0', ' ').encode('ascii', 'ignore').decode('ascii').strip()
 
-            channels_elem = row.xpath('//div[@class="fixture__channel"]')[0]
+            channels_elem = row.xpath('./div[@class="fixture__channel"]')[0]
             channels_text_raw = ' | '.join(channels_elem.itertext()).lower()
             if 'sky' in channels_text_raw:
                 channel = 'Sky Sports'
