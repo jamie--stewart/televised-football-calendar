@@ -120,18 +120,18 @@ def get_fixtures_for_competition(fixtures_url):
     return games
 
 
-def generate_calendar_for_games(games_array):
+def generate_calendar_for_games(games_array, alert_minutes=None):
     calendar = Calendar()
 
-    for game in games:
+    for game in games_array:
         event = Event()
         event.name = f'{game["fixture"]} ({game["competition"]})'
         start = game['kick_off']
         event.begin = start
         event.end = start.shift(hours=+2)
         event.location = game['channel']
-        if args.alert_minutes:
-            alarm = DisplayAlarm(trigger=timedelta(minutes=args.alert_minutes))
+        if alert_minutes:
+            alarm = DisplayAlarm(trigger=timedelta(minutes=alert_minutes))
             event.alarms.append(alarm)
         calendar.events.add(event)
 
@@ -155,4 +155,5 @@ if __name__ == '__main__':
             with open(output_path, 'w') as ics_file:
 
                 print(f'{_formatted_datetime()} Writing games to {output_path}')
-                ics_file.writelines(generate_calendar_for_games(games))
+                calendar = generate_calendar_for_games(games, args.alert_minutes)
+                ics_file.writelines(calendar.serialize())
