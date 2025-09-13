@@ -1,6 +1,5 @@
-# TODO Convert to Beautiful Soup 4
 #  Generate a football calendar
-from lxml import html
+from bs4 import BeautifulSoup
 from user_agent import generate_user_agent
 from ics.icalendar import Calendar, Event
 from ics.alarm import DisplayAlarm
@@ -39,15 +38,15 @@ def get_fixtures_for_competition(fixtures_url):
     print(f'Getting games for competition: {fixtures_url}')
 
     fixtures_page = requests.get(fixtures_url, headers=headers)
-    html_tree = html.fromstring(fixtures_page.content)
+    soup = BeautifulSoup(fixtures_page.content, 'html.parser')
 
-    listings_rows = html_tree.xpath('//div[@class="fixture" or @class="fixture-date"]')
+    listings_rows = soup.find_all('div', class_=['fixture', 'fixture-date'])
 
     games = []
 
     match_date = None
     for row in listings_rows:
-        if row.attrib['class'] == 'fixture-date':  # Have a new match date
+        if 'fixture-date' in row.get('class', []):  # Have a new match date
             if 'No Upcoming TV Fixtures' in row.text:
                 print(f'No games for competition {fixtures_url}')
                 return games
@@ -57,7 +56,7 @@ def get_fixtures_for_competition(fixtures_url):
         else:  # This is a game
             fixture = ''
             
-            teams_raw = row.xpath('./div[@class="fixture__teams"]')[0].text
+            teams_raw = row.find('div', class_='fixture__teams').get_text(strip=True)
             try:
                 home_team, away_team = [team.strip() for team in teams_raw.split(' v ')]
                 fixture = f'{home_team} vs {away_team}'
@@ -70,7 +69,7 @@ def get_fixtures_for_competition(fixtures_url):
         #     time_elem = row.xpath('./div[@class="fixture__time"]')
         # time_raw = time_elem[0].text
 
-            kickoff_time_text = row.xpath('./div[@class="fixture__time"]')[0].text
+            kickoff_time_text = row.find('div', class_='fixture__time').get_text(strip=True)
 
             if 'TBC' in kickoff_time_text:
                 continue
@@ -80,10 +79,10 @@ def get_fixtures_for_competition(fixtures_url):
 
             # Seem to have &nbsp; characters in their text
             # ICS files are ascii-encoded
-            competition = row.xpath('./div[@class="fixture__competition"]')[0].text.replace('\xa0', ' ').encode('ascii', 'ignore').decode('ascii').strip()
+            competition = row.find('div', class_='fixture__competition').get_text(strip=True).replace('\xa0', ' ').encode('ascii', 'ignore').decode('ascii')
 
-            channels_elem = row.xpath('./div[@class="fixture__channel"]')[0]
-            channels_text_raw = ' | '.join(channels_elem.itertext()).lower()
+            channels_elem = row.find('div', class_='fixture__channel')
+            channels_text_raw = channels_elem.get_text(separator=' | ', strip=True).lower()
             if 'sky' in channels_text_raw:
                 channel = 'Sky Sports'
             elif 'bbc' in channels_text_raw:
