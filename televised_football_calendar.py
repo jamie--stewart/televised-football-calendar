@@ -11,6 +11,7 @@ import datetime
 import sys
 import os
 import csv
+import logging
 
 
 program = argparse.ArgumentParser(description='Generate an .ics file of the televised Premier League fixtures')
@@ -23,9 +24,7 @@ headers = {
 
 SRC_DIR = os.path.dirname(sys.argv[0])
 
-
-def _formatted_datetime():
-    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 
 def _output_path(competition_name, output_dir):
@@ -35,12 +34,18 @@ def _output_path(competition_name, output_dir):
 
 def get_fixtures_for_competition(fixtures_url):
 
-    print(f'Getting games for competition: {fixtures_url}')
+    logger.info(f'Getting games for competition: {fixtures_url}')
+    logger.debug(f'Making HTTP request to: {fixtures_url}')
 
     fixtures_page = requests.get(fixtures_url, headers=headers)
+    logger.debug(f'HTTP response status: {fixtures_page.status_code}')
+    logger.debug(f'HTTP response content length: {len(fixtures_page.content)} bytes')
+    
     soup = BeautifulSoup(fixtures_page.content, 'html.parser')
+    logger.debug('Parsed HTML with BeautifulSoup')
 
     listings_rows = soup.find_all('div', class_=['fixture', 'fixture-date'])
+    logger.debug(f'Found {len(listings_rows)} fixture and fixture-date rows')
 
     games = []
 
@@ -48,18 +53,21 @@ def get_fixtures_for_competition(fixtures_url):
     for row in listings_rows:
         if 'fixture-date' in row.get('class', []):  # Have a new match date
             if 'No Upcoming TV Fixtures' in row.text:
-                print(f'No games for competition {fixtures_url}')
+                logger.info(f'No games for competition {fixtures_url}')
                 return games
 
             match_date = arrow.get(row.text, 'dddd Do MMMM YYYY', tzinfo='Europe/London')
+            logger.debug(f'Parsed match date: {match_date}')
 
         else:  # This is a game
             fixture = ''
             
             teams_raw = row.find('div', class_='fixture__teams').get_text(strip=True)
+            logger.debug(f'Raw teams text: "{teams_raw}"')
             try:
                 home_team, away_team = [team.strip() for team in teams_raw.split(' v ')]
                 fixture = f'{home_team} vs {away_team}'
+                logger.debug(f'Parsed fixture: {fixture}')
             except ValueError:
                 if teams_raw.strip() == 'TBC':
                     fixture = 'TBC'
@@ -83,6 +91,7 @@ def get_fixtures_for_competition(fixtures_url):
 
             channels_elem = row.find('div', class_='fixture__channel')
             channels_text_raw = channels_elem.get_text(separator=' | ', strip=True).lower()
+            logger.debug(f'Raw channel text: "{channels_text_raw}"')
             if 'sky' in channels_text_raw:
                 channel = 'Sky Sports'
             elif 'bbc' in channels_text_raw:
@@ -108,6 +117,8 @@ def get_fixtures_for_competition(fixtures_url):
             else:
                 raise ValueError(f'Television channel not recognised: {channels_text_raw}')
 
+            logger.debug(f'Mapped to channel: {channel}')
+            
             game = {
                 'fixture': fixture,
                 'kick_off': kick_off,
@@ -115,7 +126,9 @@ def get_fixtures_for_competition(fixtures_url):
                 'competition': competition
             }
             games.append(game)
+            logger.debug(f'Added game: {fixture} at {kick_off} on {channel}')
 
+    logger.debug(f'Returning {len(games)} total games')
     return games
 
 
@@ -138,6 +151,11 @@ def generate_calendar_for_games(games_array, alert_minutes=None):
 
 
 if __name__ == '__main__':
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
 
     args = program.parse_args()
 
@@ -147,12 +165,11 @@ if __name__ == '__main__':
 
         for row in reader:
             games = get_fixtures_for_competition(row['URL'])
-            # TODOJ: Convert to a proper logger
-            print(f'{_formatted_datetime()} Got {len(games)} games for {row["NAME"]}')
+            logger.info(f'Got {len(games)} games for {row["NAME"]}')
 
             output_path = _output_path(row['NAME'], args.output_dir)
             with open(output_path, 'w') as ics_file:
 
-                print(f'{_formatted_datetime()} Writing games to {output_path}')
+                logger.info(f'Writing games to {output_path}')
                 calendar = generate_calendar_for_games(games, args.alert_minutes)
                 ics_file.writelines(calendar.serialize())

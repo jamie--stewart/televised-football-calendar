@@ -10,11 +10,13 @@ This document outlines potential improvements for the televised football calenda
 
 ✅ **Comprehensive Test Suite**: Implemented pytest-based integration tests with realistic fixtures, covering all major functionality including ICS generation, multiple competitions, channel mapping, and datetime handling
 
-✅ **Dependency Updates**: Upgraded to latest secure versions with semantic versioning constraints (notably lxml 5.2.2 → 6.0.1)
+✅ **Dependency Updates**: Upgraded to latest secure versions with semantic versioning constraints (migrated from lxml to Beautiful Soup 4.13.5)
 
 ✅ **Developer Infrastructure**: Added proper requirements management with pip-tools, Makefile targets, and test automation
 
-The codebase now has solid test coverage and is ready for architectural refactoring with confidence.
+✅ **Proper Logging System**: Implemented comprehensive Python logging with INFO and DEBUG levels, replacing all print statements with structured logging including timestamps
+
+The codebase now has solid test coverage, proper logging, and is ready for architectural refactoring with confidence.
 
 ## 1. Robustness & Error Handling
 
@@ -54,26 +56,34 @@ The codebase now has solid test coverage and is ready for architectural refactor
 ## 2. Code Quality & Architecture
 
 ### 2.1 Beautiful Soup Migration
-**Current Issue:** TODO comment indicates intention to migrate from lxml to Beautiful Soup 4.
+**Status:** ✅ **COMPLETED**
 
-**Proposed Solution:**
-- Replace lxml HTML parsing with Beautiful Soup 4
-- Maintain existing parsing logic but with more readable selectors
-- Add better handling of malformed HTML
-- Improve CSS selector usage for more robust element selection
+**Implemented:**
+- Migrated from lxml to Beautiful Soup 4.13.5 
+- Replaced XPath selectors with Pythonic find methods
+- Updated dependencies: `lxml>=6.0.0,<7.0.0` → `beautifulsoup4>=4.13.0,<5.0.0`
+- Converted `html.fromstring()` → `BeautifulSoup(content, 'html.parser')`
+- All parsing logic maintained with more readable selectors
+- All integration tests pass, confirming no behavioral changes
 
-**Impact:** Medium - Better maintainability and HTML parsing resilience
+**Impact:** Medium - Significantly improved code maintainability and HTML parsing resilience
 
 ### 2.2 Proper Logging System
-**Current Issue:** Using print statements throughout the code (TODO on line 151).
+**Status:** ✅ **COMPLETED**
 
-**Proposed Solution:**
-- Implement Python's logging module with configurable levels
-- Add structured logging with timestamps and log levels
-- Support for different output formats (console, file)
-- Add debug logging for troubleshooting parsing issues
+**Implemented:**
+- Replaced all 4 print statements with Python's logging module
+- Added structured logging with timestamps and log levels (INFO/DEBUG)
+- Configured default INFO level with `basicConfig()` formatting
+- Added comprehensive debug logging throughout parsing logic:
+  - HTTP request/response details
+  - HTML parsing steps and element counts
+  - Date parsing and team name extraction
+  - Channel mapping and game creation
+- Removed unused `_formatted_datetime()` function (timestamps handled by logging)
+- All tests continue to pass with logging implementation
 
-**Impact:** Low - Better debugging and monitoring capabilities
+**Impact:** Medium - Significantly improved debugging capabilities and execution visibility
 
 ### 2.3 Bug Fixes
 **Status:** ✅ **COMPLETED** 
@@ -243,7 +253,7 @@ The codebase now has solid test coverage and is ready for architectural refactor
 
 **Implemented:**
 - Updated dependencies with semantic versioning constraints in `.in` files
-- Major version upgrade: `lxml` 5.2.2 → 6.0.1
+- Major library migration: `lxml` → `beautifulsoup4` 4.13.5
 - Patch updates: `user-agent` 0.1.10 → 0.1.14
 - Version ranges to prevent breaking changes (e.g., `>=1.3.0,<2.0.0`)
 - Frozen exact versions in compiled `.txt` files for reproducible builds
@@ -289,8 +299,8 @@ The codebase now has solid test coverage and is ready for architectural refactor
 5. ✅ ~~Create comprehensive test suite~~ **COMPLETED**
 
 **Medium Priority:**
-1. Beautiful Soup migration
-2. Proper logging system
+1. ✅ ~~Beautiful Soup migration~~ **COMPLETED**
+2. ✅ ~~Proper logging system~~ **COMPLETED**
 3. Configuration file system
 4. Caching implementation
 5. Change detection and notifications
