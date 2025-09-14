@@ -1,0 +1,70 @@
+repos:
+  # Ruff for fast Python linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Run the linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        name: ruff-lint
+        description: "Run ruff linter with auto-fix"
+
+      # Run the formatter
+      - id: ruff-format
+        name: ruff-format
+        description: "Run ruff formatter"
+
+  # Additional code quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Basic file checks
+      - id: trailing-whitespace
+        name: trim-trailing-whitespace
+        description: "Remove trailing whitespace"
+
+      - id: end-of-file-fixer
+        name: fix-end-of-file
+        description: "Ensure files end with a newline"
+
+      - id: check-yaml
+        name: check-yaml-syntax
+        description: "Check YAML file syntax"
+
+      - id: check-toml
+        name: check-toml-syntax
+        description: "Check TOML file syntax"
+
+      - id: check-json
+        name: check-json-syntax
+        description: "Check JSON file syntax"
+
+      # Python-specific checks
+      - id: check-ast
+        name: check-python-ast
+        description: "Check Python AST"
+
+      - id: debug-statements
+        name: check-debug-statements
+        description: "Check for debugger imports"
+
+  # Local hooks for project-specific checks
+  - repo: local
+    hooks:
+      # Run tests to ensure code changes don't break functionality
+      - id: pytest
+        name: run-tests
+        entry: python -m pytest
+        language: system
+        types: [python]
+        pass_filenames: false
+        description: "Run the full test suite"
+
+      # Type checking with mypy (optional - commented out for now)
+      # - id: mypy
+      #   name: mypy-type-check
+      #   entry: python -m mypy
+      #   language: system
+      #   types: [python]
+      #   require_serial: false
+      #   description: "Run mypy type checking"

@@ -1,9 +1,10 @@
-import pytest
-import tempfile
-import os
 import csv
+import os
 import sys
+import tempfile
 from pathlib import Path
+
+import pytest
 from freezegun import freeze_time
 
 # Add parent directory to path so test modules can import the main module
@@ -28,12 +29,12 @@ def temp_output_dir():
 def mock_competitions_csv(temp_output_dir):
     """Create a temporary competitions.csv file for testing."""
     csv_path = os.path.join(temp_output_dir, "competitions.csv")
-    with open(csv_path, 'w', newline='') as csvfile:
+    with open(csv_path, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['NAME', 'URL'])
-        writer.writerow(['Premier League', 'http://test.com/premier-league'])
-        writer.writerow(['FA Cup', 'http://test.com/fa-cup'])
-        writer.writerow(['Euro 2024', 'http://test.com/euro-2024'])
+        writer.writerow(["NAME", "URL"])
+        writer.writerow(["Premier League", "http://test.com/premier-league"])
+        writer.writerow(["FA Cup", "http://test.com/fa-cup"])
+        writer.writerow(["Euro 2024", "http://test.com/euro-2024"])
     return csv_path
 
 

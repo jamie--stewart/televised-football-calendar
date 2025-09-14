@@ -1,4 +1,4 @@
-.PHONY: test test-verbose install-test-deps compile-dev-deps clean help
+.PHONY: test test-verbose install-test-deps compile-dev-deps clean lint format lint-check help
 
 # Default target
 help:
@@ -7,6 +7,9 @@ help:
 	@echo "  test-verbose      - Run tests with verbose output"
 	@echo "  install-test-deps - Install test dependencies"
 	@echo "  compile-dev-deps  - Compile development requirements"
+	@echo "  lint              - Run ruff linting and formatting"
+	@echo "  lint-check        - Check code formatting and linting without fixing"
+	@echo "  format            - Format code with ruff"
 	@echo "  clean             - Remove test artifacts and cache"
 	@echo "  help              - Show this help message"
 
@@ -26,6 +29,20 @@ test:
 # Run tests with verbose output and show local variables on failure
 test-verbose:
 	python -m pytest tests/ -v -s --tb=long
+
+# Run ruff linting and formatting (fix issues)
+lint:
+	ruff check --fix
+	ruff format
+
+# Check code formatting and linting without fixing
+lint-check:
+	ruff check --no-fix
+	ruff format --check
+
+# Format code with ruff
+format:
+	ruff format
 
 # Clean up test artifacts
 clean:

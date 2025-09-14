@@ -1,0 +1,61 @@
+[tool.ruff]
+# Set line length to 120 characters
+line-length = 120
+
+# Enable auto-fixing for applicable rules
+fix = true
+
+# Exclude common directories
+exclude = [
+    ".git",
+    ".pytest_cache",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+]
+
+# Enable specific rule categories
+lint.select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "C4",  # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "T20", # flake8-print (catches leftover print statements)
+    "SIM", # flake8-simplify
+    "ARG", # flake8-unused-arguments
+]
+
+# Ignore specific rules that might be too strict for this project
+lint.ignore = [
+    "E501",  # Line too long (we set line-length = 120)
+    "T201",  # Allow print statements in main execution (not in functions)
+    "A003",  # Allow some builtin shadowing for common names like 'id'
+]
+
+# Configure specific rule behavior
+[tool.ruff.lint.per-file-ignores]
+# Allow print statements in test files for debugging
+"tests/*.py" = ["T201"]
+
+# Configure import sorting (isort replacement)
+[tool.ruff.lint.isort]
+# Group imports into sections
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+# Add a line between different import groups
+split-on-trailing-comma = true
+
+# Configure formatting options
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Use 4 spaces for indentation
+indent-style = "space"
+# Respect magic trailing comma in collections
+skip-magic-trailing-comma = false
