@@ -1,7 +1,7 @@
 import responses
 from freezegun import freeze_time
 
-from televised_football_calendar import get_fixtures_for_competition
+from scraper import get_fixtures_for_competition
 
 
 class TestErrorHandling:
@@ -48,8 +48,8 @@ class TestErrorHandling:
         games = get_fixtures_for_competition(url)
 
         assert len(games) == 1
-        assert games[0]["fixture"] == "Chelsea vs Manchester City"
-        assert games[0]["channel"] == "Sky Sports"
+        assert games[0].fixture == "Chelsea vs Manchester City"
+        assert games[0].channel == "Sky Sports"
 
     @responses.activate
     @freeze_time("2024-01-15 12:00:00")
@@ -88,7 +88,7 @@ class TestErrorHandling:
         games = get_fixtures_for_competition(url)
 
         assert len(games) == 1
-        assert games[0]["fixture"] == "Chelsea vs Manchester City"
+        assert games[0].fixture == "Chelsea vs Manchester City"
 
     @responses.activate
     @freeze_time("2024-01-15 12:00:00")
@@ -133,7 +133,7 @@ class TestErrorHandling:
         games = get_fixtures_for_competition(url)
 
         assert len(games) == 1
-        assert games[0]["fixture"] == "Chelsea vs Manchester City"
+        assert games[0].fixture == "Chelsea vs Manchester City"
 
     @responses.activate
     @freeze_time("2024-01-15 12:00:00")
@@ -161,8 +161,8 @@ class TestErrorHandling:
         games = get_fixtures_for_competition(url)
 
         assert len(games) == 1
-        assert games[0]["fixture"] == "Arsenal vs Liverpool"
-        assert games[0]["channel"] == "Unknown"
+        assert games[0].fixture == "Arsenal vs Liverpool"
+        assert games[0].channel == "Unknown"
 
     @responses.activate
     @freeze_time("2024-01-15 12:00:00")
@@ -199,4 +199,4 @@ class TestErrorHandling:
         games = get_fixtures_for_competition(url)
 
         assert len(games) == 1
-        assert games[0]["fixture"] == "Chelsea vs Manchester City"
+        assert games[0].fixture == "Chelsea vs Manchester City"

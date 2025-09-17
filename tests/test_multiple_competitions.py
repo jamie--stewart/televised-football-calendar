@@ -3,7 +3,9 @@ import os
 import responses
 from ics import Calendar
 
-from televised_football_calendar import _output_path, generate_calendar_for_games, get_fixtures_for_competition
+from generator import generate_calendar
+from scraper import get_fixtures_for_competition
+from utils import get_output_path
 
 
 class TestMultipleCompetitions:
@@ -20,15 +22,15 @@ class TestMultipleCompetitions:
 
         # Process Premier League
         pl_fixtures = get_fixtures_for_competition("http://test.com/premier-league")
-        pl_calendar = generate_calendar_for_games(pl_fixtures)
-        pl_output = _output_path("Premier League", temp_output_dir)
+        pl_calendar = generate_calendar(pl_fixtures)
+        pl_output = get_output_path("Premier League", temp_output_dir)
         with open(pl_output, "w") as f:
             f.writelines(pl_calendar.serialize())
 
         # Process FA Cup
         fa_fixtures = get_fixtures_for_competition("http://test.com/fa-cup")
-        fa_calendar = generate_calendar_for_games(fa_fixtures)
-        fa_output = _output_path("FA Cup", temp_output_dir)
+        fa_calendar = generate_calendar(fa_fixtures)
+        fa_output = get_output_path("FA Cup", temp_output_dir)
         with open(fa_output, "w") as f:
             f.writelines(fa_calendar.serialize())
 

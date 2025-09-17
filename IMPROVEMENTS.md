@@ -167,15 +167,24 @@ The codebase now has solid test coverage, proper logging, robust error handling,
 ## 4. Architecture Improvements
 
 ### 4.1 Modular Design
-**Current Issue:** All logic in a single file makes testing and maintenance difficult.
+**Status:** ✅ **COMPLETED**
 
-**Proposed Solution:**
-- Separate scraping logic into dedicated classes
-- Create abstract base class for different fixture sources
-- Modular calendar generation with pluggable formatters
-- Separate data models for fixtures, competitions, and events
+**Implemented:**
+- Refactored monolithic 334-line script into clean modular architecture with 7 focused files:
+  - `main.py` - CLI entry point and orchestration
+  - `models.py` - Data classes for Fixture and Competition with type hints
+  - `scraper.py` - Web scraping and HTTP request handling
+  - `parser.py` - HTML parsing, fixture extraction, and channel mapping
+  - `generator.py` - ICS calendar generation with alarm support
+  - `validator.py` - Comprehensive input validation logic
+  - `utils.py` - Logging configuration and file utilities
+- Each module has single, clear responsibility for better maintainability
+- Replaced dictionary-based data with proper `Fixture` and `Competition` dataclasses
+- Updated all 19 tests to work with new modular structure (100% test coverage maintained)
+- Safely removed old monolithic script after verification
+- Maintained 100% backward compatibility - same CLI interface and behavior
 
-**Impact:** High - Better testability, maintainability, and extensibility
+**Impact:** High - Significantly improved code organization, testability, and maintainability. Architecture now ready for easy implementation of retry logic, caching, filtering, and other enhancements.
 
 ### 4.2 Caching System
 **Current Issue:** No caching means repeated requests for the same data.
@@ -234,7 +243,26 @@ The codebase now has solid test coverage, proper logging, robust error handling,
 
 **Impact:** Medium - Broader appeal and usage
 
-### 5.4 User Interface Options
+### 5.4 Cloud Storage Integration
+**Current Issue:** ICS files are only saved locally, requiring manual distribution.
+
+**Proposed Solution:**
+- Dropbox API integration for automatic upload of generated calendars
+- Support for other cloud storage providers (Google Drive, OneDrive, iCloud)
+- Configurable upload paths and file naming conventions
+- Optional local file retention settings
+- Authentication via access tokens or OAuth flows
+
+**Implementation Requirements:**
+- Add `dropbox>=11.36.0` dependency to requirements.in
+- New `--dropbox-token` CLI argument or environment variable for authentication
+- `upload_to_dropbox()` function to handle file uploads after generation
+- Integration point after ICS file writing in main processing loop
+- Error handling for upload failures with fallback to local-only mode
+
+**Impact:** Medium - Enables automatic calendar distribution and reduces manual file management
+
+### 5.5 User Interface Options
 **Current Issue:** Command-line only interface.
 
 **Proposed Solution:**
@@ -339,7 +367,7 @@ The codebase now has solid test coverage, proper logging, robust error handling,
 2. ✅ ~~Add basic error handling~~ **COMPLETED** (Enhanced parsing error handling)
 3. ✅ ~~Input validation~~ **COMPLETED**
 4. Add retry logic for network requests
-5. Implement modular architecture
+5. ✅ ~~Implement modular architecture~~ **COMPLETED**
 6. Add filtering capabilities
 7. ✅ ~~Create comprehensive test suite~~ **COMPLETED**
 

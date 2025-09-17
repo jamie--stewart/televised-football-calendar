@@ -3,7 +3,7 @@ import os
 import tempfile
 from unittest.mock import patch
 
-from televised_football_calendar import validate_inputs
+from validator import validate_inputs
 
 
 class TestInputValidation:

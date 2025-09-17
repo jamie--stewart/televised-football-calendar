@@ -1,7 +1,9 @@
 import responses
 from ics import Calendar
 
-from televised_football_calendar import _output_path, generate_calendar_for_games, get_fixtures_for_competition
+from generator import generate_calendar
+from scraper import get_fixtures_for_competition
+from utils import get_output_path
 
 
 class TestChannelMapping:
@@ -13,9 +15,9 @@ class TestChannelMapping:
         responses.add(responses.GET, "http://test.com/mixed-channels", body=mixed_channels_html, status=200)
 
         fixtures = get_fixtures_for_competition("http://test.com/mixed-channels")
-        calendar = generate_calendar_for_games(fixtures)
+        calendar = generate_calendar(fixtures)
 
-        output_path = _output_path("Mixed Channels", temp_output_dir)
+        output_path = get_output_path("Mixed Channels", temp_output_dir)
         with open(output_path, "w") as f:
             f.writelines(calendar.serialize())
 

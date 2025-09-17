@@ -3,7 +3,9 @@ import os
 import responses
 from ics import Calendar
 
-from televised_football_calendar import _output_path, generate_calendar_for_games, get_fixtures_for_competition
+from generator import generate_calendar
+from scraper import get_fixtures_for_competition
+from utils import get_output_path
 
 
 class TestBasicICSGeneration:
@@ -17,10 +19,10 @@ class TestBasicICSGeneration:
 
         # Get fixtures and generate calendar
         fixtures = get_fixtures_for_competition("http://test.com/premier-league")
-        calendar = generate_calendar_for_games(fixtures)
+        calendar = generate_calendar(fixtures)
 
         # Write to file
-        output_path = _output_path("Premier League", temp_output_dir)
+        output_path = get_output_path("Premier League", temp_output_dir)
         with open(output_path, "w") as f:
             f.writelines(calendar.serialize())
 
@@ -53,9 +55,9 @@ class TestBasicICSGeneration:
         responses.add(responses.GET, "http://test.com/euro-2024", body=euro_2024_no_fixtures_html, status=200)
 
         fixtures = get_fixtures_for_competition("http://test.com/euro-2024")
-        calendar = generate_calendar_for_games(fixtures)
+        calendar = generate_calendar(fixtures)
 
-        output_path = _output_path("Euro 2024", temp_output_dir)
+        output_path = get_output_path("Euro 2024", temp_output_dir)
         with open(output_path, "w") as f:
             f.writelines(calendar.serialize())
 
