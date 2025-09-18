@@ -26,7 +26,13 @@ This document outlines potential improvements for the televised football calenda
 
 ✅ **Public URL Generation**: Enhanced Dropbox integration to automatically generate and log public download URLs for uploaded .ics files, enabling easy calendar subscription sharing
 
-The codebase now has solid test coverage, proper logging, robust error handling, comprehensive input validation, automated code quality tools, professional cloud storage integration with public URL generation, and is ready for further enhancements with confidence.
+✅ **Enhanced Configuration System**: Migrated from CSV to TOML format with advanced filtering capabilities:
+- Extracted constants module for channel name mappings
+- Date filtering to skip early rounds (e.g., `start_date = "2024-01-01"`)
+- Team name regex filtering (e.g., `team_filters = ["Arsenal", ".*City"]`)
+- Comprehensive test suite with 11 tests covering all filtering scenarios
+
+The codebase now has solid test coverage, proper logging, robust error handling, comprehensive input validation, automated code quality tools, professional cloud storage integration with public URL generation, enhanced TOML-based configuration with advanced filtering, and is ready for further enhancements with confidence.
 
 ## 1. Robustness & Error Handling
 
@@ -145,17 +151,36 @@ The codebase now has solid test coverage, proper logging, robust error handling,
 
 ## 3. Configuration and Flexibility
 
-### 3.1 Configuration File System
-**Current Issue:** Hardcoded channel mappings and settings scattered throughout code.
+### 3.1 Enhanced Configuration System
+**Status:** ✅ **COMPLETED**
 
-**Proposed Solution:**
-- Create a YAML/JSON configuration file for settings
-- Move channel name mappings to configuration
-- Add configurable default alert times
-- Support for user-defined output filename patterns
-- Timezone configuration options
+**Implemented:**
+- Migrated from CSV to TOML format for better structure and extensibility
+- Extracted channel name mappings to dedicated `constants.py` module
+- Added date filtering capability to skip early competition rounds:
+  - Set `start_date = "2024-01-01"` to exclude fixtures before that date
+  - Graceful handling of invalid date formats with logging
+- Implemented team name regex filtering for targeted fixture selection:
+  - Support for exact matches: `["Arsenal", "Chelsea"]`
+  - Support for regex patterns: `[".*City", "United.*"]`
+  - Case-insensitive matching for flexibility
+  - Invalid regex pattern handling with warnings
+- Enhanced Competition model with optional filtering fields
+- Comprehensive test suite (11 tests) covering:
+  - TOML config loading and error handling
+  - Date filtering edge cases and invalid formats
+  - Team regex filtering with various patterns
+  - Combined filtering scenarios and TBC fixtures
 
-**Impact:** Medium - More flexible and user-customizable
+**Example Configuration:**
+```toml
+[competitions."FA Cup"]
+url = "http://www.live-footballontv.com/live-fa-cup-football-on-tv.html"
+start_date = "2024-01-01"  # Skip early rounds
+team_filters = ["Arsenal", "Chelsea.*", "Liverpool"]  # Only these teams
+```
+
+**Impact:** High - Significantly more flexible and user-customizable with advanced filtering capabilities
 
 ### 3.2 Competition Management
 **Current Issue:** Competitions are managed in a simple CSV file with limited metadata.
@@ -215,15 +240,21 @@ The codebase now has solid test coverage, proper logging, robust error handling,
 ## 5. New Features
 
 ### 5.1 Advanced Filtering
-**Current Issue:** No way to filter fixtures by specific criteria.
+**Status:** ✅ **COMPLETED**
 
-**Proposed Solution:**
-- Team-based filtering (follow specific teams only)
-- Date range filtering (next week, next month, etc.)
+**Implemented:**
+- Team-based filtering with regex support for following specific teams
+- Date filtering to skip early competition rounds or set minimum dates
+- Comprehensive filtering logic integrated into main processing pipeline
+- Support for combined filtering (both date and team criteria)
+- Graceful handling of edge cases (TBC fixtures, invalid patterns)
+
+**Proposed Extensions:**
 - Channel-based filtering (only Sky Sports, only free-to-air)
 - Competition priority settings
+- Time-based filtering (only weekend games, only evening matches)
 
-**Impact:** High - Much more useful for users with specific interests
+**Impact:** High - Much more useful for users with specific interests, core filtering now implemented
 
 ### 5.2 Change Detection and Notifications
 **Current Issue:** No way to detect when fixture times or channels change.
@@ -386,7 +417,7 @@ The codebase now has solid test coverage, proper logging, robust error handling,
 3. ✅ ~~Input validation~~ **COMPLETED**
 4. Add retry logic for network requests
 5. ✅ ~~Implement modular architecture~~ **COMPLETED**
-6. Add filtering capabilities
+6. ✅ ~~Add filtering capabilities~~ **COMPLETED** (Date and team filtering)
 7. ✅ ~~Create comprehensive test suite~~ **COMPLETED**
 
 **Medium Priority:**

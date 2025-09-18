@@ -5,6 +5,7 @@ import logging
 import arrow
 from bs4 import BeautifulSoup
 
+from constants import CHANNEL_MAPPINGS, DEFAULT_CHANNEL
 from models import Fixture
 
 logger = logging.getLogger(__name__)
@@ -22,31 +23,12 @@ def map_channel_name(channels_text_raw: str) -> str:
     """
     channels_text_lower = channels_text_raw.lower()
 
-    if "sky" in channels_text_lower:
-        return "Sky Sports"
-    elif "bbc" in channels_text_lower:
-        return "BBC"
-    elif "tnt sports" in channels_text_lower:
-        return "TNT Sports"
-    elif "itv" in channels_text_lower:
-        return "ITV"
-    elif "tbc" in channels_text_lower:
-        return "TBC"
-    elif "premier" in channels_text_lower:
-        return "Premier Sports"
-    elif "eleven" in channels_text_lower:
-        return "Eleven Sports"
-    elif "amazon prime video" in channels_text_lower:
-        return "Amazon Prime"
-    elif "s4c facebook" in channels_text_lower:
-        return "S4C Facebook"
-    elif "rangers tv" in channels_text_lower:
-        return "Rangers TV"
-    elif "celtic" in channels_text_lower:
-        return "Celtic TV"
-    else:
-        logger.warning(f'Unrecognized television channel "{channels_text_raw}". Using "Unknown".')
-        return "Unknown"
+    for key, friendly_name in CHANNEL_MAPPINGS.items():
+        if key in channels_text_lower:
+            return friendly_name
+
+    logger.warning(f'Unrecognized television channel "{channels_text_raw}". Using "{DEFAULT_CHANNEL}".')
+    return DEFAULT_CHANNEL
 
 
 def parse_fixtures_html(html_content: bytes, source_url: str) -> list[Fixture]:

@@ -1,0 +1,32 @@
+[competitions]
+
+[competitions.premier_league]
+name = "Premier League"
+url = "http://www.live-footballontv.com/live-premier-league-football-on-tv.html"
+start_date = ""  # Optional: skip games before this date (YYYY-MM-DD format)
+# Top 6 teams only
+team_filters = ["Arsenal", "Man.+United", "Man.+City", "Liverpool", "Chelsea", "totten|spur"]  # Optional: regex patterns for team names to include
+
+[competitions.fa_cup]
+name = "FA Cup"
+url = "http://www.live-footballontv.com/live-fa-cup-football-on-tv.html"
+start_date = ""  # Example: "2024-01-01" to skip early rounds
+team_filters = []
+
+[competitions.champions_league]
+name = "Champions League"
+url = "http://www.live-footballontv.com/live-champions-league-football-on-tv.html"
+start_date = ""
+team_filters = []
+
+[competitions.league_cup]
+name = "League Cup"
+url = "http://www.live-footballontv.com/carabao-cup-on-tv.html"
+start_date = ""
+team_filters = []
+
+[competitions.world_cup]
+name = "World Cup"
+url = "http://www.live-footballontv.com/live-world-cup-football-on-tv.html"
+start_date = ""
+team_filters = []
