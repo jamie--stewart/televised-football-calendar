@@ -40,3 +40,5 @@ __pycache__
 
 .vscode
 
+# Output directory
+output/

@@ -4,3 +4,7 @@ ics>=0.7.2,<0.8.0
 beautifulsoup4>=4.13.0,<5.0.0  # HTML parsing library
 requests>=2.32.0,<3.0.0
 user-agent>=0.1.14,<0.2.0  # Latest patch version
+dropbox>=11.36.0,<12.0.0  # Dropbox API integration
+pydantic>=2.0.0,<3.0.0  # Settings management
+pydantic-settings>=2.0.0,<3.0.0  # Settings from environment
+python-dotenv>=1.0.0,<2.0.0  # Environment variable loading
