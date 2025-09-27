@@ -6,12 +6,12 @@ import os
 import sys
 from typing import Optional
 
-from cloud_storage import DropboxUploader
-from generator import generate_calendar
-from models import Competition
-from scraper import get_fixtures_for_competition
-from settings import load_settings
-from utils import (
+from src.football_calendar.cloud_storage import DropboxUploader
+from src.football_calendar.generator import generate_calendar
+from src.football_calendar.models import Competition
+from src.football_calendar.scraper import get_fixtures_for_competition
+from src.football_calendar.settings import load_settings
+from src.football_calendar.utils import (
     get_competitions_file_path,
     get_output_path,
     load_competitions_config,

@@ -5,8 +5,8 @@ import logging
 import arrow
 from bs4 import BeautifulSoup
 
-from constants import CHANNEL_MAPPINGS, DEFAULT_CHANNEL
-from models import Fixture
+from .constants import CHANNEL_MAPPINGS, DEFAULT_CHANNEL
+from .models import Fixture
 
 logger = logging.getLogger(__name__)
 

@@ -3,9 +3,9 @@ import os
 import responses
 from ics import Calendar
 
-from generator import generate_calendar
-from scraper import get_fixtures_for_competition
-from utils import get_output_path
+from src.football_calendar.generator import generate_calendar
+from src.football_calendar.scraper import get_fixtures_for_competition
+from src.football_calendar.utils import get_output_path
 
 
 class TestMultipleCompetitions:

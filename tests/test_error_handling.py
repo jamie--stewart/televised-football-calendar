@@ -1,7 +1,7 @@
 import responses
 from freezegun import freeze_time
 
-from scraper import get_fixtures_for_competition
+from src.football_calendar.scraper import get_fixtures_for_competition
 
 
 class TestErrorHandling:

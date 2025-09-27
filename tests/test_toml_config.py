@@ -6,8 +6,8 @@ from datetime import datetime
 
 import pytest
 
-from models import Competition
-from utils import load_competitions_config, should_include_fixture
+from src.football_calendar.models import Competition
+from src.football_calendar.utils import load_competitions_config, should_include_fixture
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ team_filters = [".*City", "United.*"]
 def test_load_competitions_config(temp_toml_config, monkeypatch):
     """Test loading competitions from TOML config."""
     # Mock get_competitions_file_path to return our temp file
-    monkeypatch.setattr("utils.get_competitions_file_path", lambda: temp_toml_config)
+    monkeypatch.setattr("src.football_calendar.utils.get_competitions_file_path", lambda: temp_toml_config)
 
     config = load_competitions_config()
 
@@ -74,7 +74,7 @@ def test_load_competitions_config(temp_toml_config, monkeypatch):
 
 def test_load_competitions_config_file_not_found(monkeypatch):
     """Test handling of missing TOML config file."""
-    monkeypatch.setattr("utils.get_competitions_file_path", lambda: "/nonexistent/file.toml")
+    monkeypatch.setattr("src.football_calendar.utils.get_competitions_file_path", lambda: "/nonexistent/file.toml")
 
     config = load_competitions_config()
 

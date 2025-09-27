@@ -1,12 +1,12 @@
 """Web scraping functionality for televised football fixtures."""
 
 import logging
-from parser import parse_fixtures_html
 
 import requests
 from user_agent import generate_user_agent
 
-from models import Fixture
+from .models import Fixture
+from .parser import parse_fixtures_html
 
 logger = logging.getLogger(__name__)
 

@@ -4,14 +4,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 from dropbox.exceptions import AuthError
 
-from cloud_storage import DropboxUploader
-from settings import Settings
+from src.football_calendar.cloud_storage import DropboxUploader
+from src.football_calendar.settings import Settings
 
 
 class TestDropboxIntegration:
     """Test Dropbox cloud storage integration functionality."""
 
-    @patch("cloud_storage.dropbox.Dropbox")
+    @patch("src.football_calendar.cloud_storage.dropbox.Dropbox")
     def test_successful_dropbox_upload_happy_path(self, mock_dropbox_class, temp_output_dir):
         """Test successful Dropbox upload with valid configuration."""
         # Setup mock Dropbox client
@@ -50,7 +50,7 @@ class TestDropboxIntegration:
         assert remote_path == "/test-path/test-calendar.ics"
         assert b"BEGIN:VCALENDAR" in uploaded_content
 
-    @patch("cloud_storage.dropbox.Dropbox")
+    @patch("src.football_calendar.cloud_storage.dropbox.Dropbox")
     def test_dropbox_upload_with_retry_logic(self, mock_dropbox_class, temp_output_dir):
         """Test that retry logic works for transient failures."""
         # Setup mock Dropbox client
@@ -83,7 +83,7 @@ class TestDropboxIntegration:
         assert public_url == "https://dl.dropboxusercontent.com/s/def456/test-calendar.ics?dl=1"
         assert mock_client.files_upload.call_count == 3
 
-    @patch("cloud_storage.dropbox.Dropbox")
+    @patch("src.football_calendar.cloud_storage.dropbox.Dropbox")
     def test_dropbox_auth_failure(self, mock_dropbox_class):
         """Test that authentication failures are handled gracefully."""
         # Setup mock Dropbox client to raise AuthError
@@ -113,7 +113,7 @@ class TestDropboxIntegration:
         with pytest.raises(ValueError, match="FC_DROPBOX_ACCESS_TOKEN environment variable is not set"):
             Settings(dropbox_enabled=True, dropbox_access_token=None, dropbox_upload_path="/")
 
-    @patch("cloud_storage.dropbox.Dropbox")
+    @patch("src.football_calendar.cloud_storage.dropbox.Dropbox")
     def test_upload_failure_returns_false(self, mock_dropbox_class, temp_output_dir):
         """Test that upload failures return False and don't crash."""
         # Setup mock Dropbox client to always fail

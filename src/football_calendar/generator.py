@@ -6,7 +6,7 @@ from typing import Optional
 from ics.alarm import DisplayAlarm
 from ics.icalendar import Calendar, Event
 
-from models import Fixture
+from .models import Fixture
 
 
 def generate_calendar(fixtures: list[Fixture], alert_minutes: Optional[int] = None) -> Calendar:
@@ -31,7 +31,8 @@ def generate_calendar(fixtures: list[Fixture], alert_minutes: Optional[int] = No
         event.location = fixture.channel
 
         if alert_minutes:
-            alarm = DisplayAlarm(trigger=timedelta(minutes=alert_minutes))
+            # Note: the alarm is set to alert_minutes before the event
+            alarm = DisplayAlarm(trigger=timedelta(minutes=alert_minutes * -1))
             event.alarms.append(alarm)
 
         calendar.events.add(event)

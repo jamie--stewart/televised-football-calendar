@@ -5,7 +5,7 @@ import tempfile
 
 import pytest
 
-from settings import Settings, load_settings
+from src.football_calendar.settings import Settings, load_settings
 
 
 @pytest.fixture
