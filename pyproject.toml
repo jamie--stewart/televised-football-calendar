@@ -51,7 +51,7 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 # Add a line between different import groups
 split-on-trailing-comma = true
 # Treat src.football_calendar as first-party
-known-first-party = ["src.football_calendar"]
+known-first-party = ["src.football_calendar", "src.bunkr_ui"]
 
 # Configure formatting options
 [tool.ruff.format]

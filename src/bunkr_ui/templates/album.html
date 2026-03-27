@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ album.title if album else "Album" }} - Bunkr UI{% endblock %}
+
+{% block content %}
+{% if error is defined and error %}
+<div class="error-banner">{{ error }}</div>
+<a href="/" class="back-link">&laquo; Back to search</a>
+{% elif album %}
+<div class="album-header">
+    <a href="/" class="back-link">&laquo; Back to search</a>
+    <h1>{{ album.title }}</h1>
+    <p class="album-meta">{{ album.items | length }} items</p>
+</div>
+
+<div class="thumbnail-grid">
+    {% for item in album.items %}
+    <a href="{{ item.file_url }}" target="_blank" rel="noopener" class="thumb-card">
+        {% if item.thumbnail_url %}
+        <img
+            src="/proxy/thumb?url={{ item.thumbnail_url | urlencode }}"
+            alt="{{ item.filename }}"
+            loading="lazy"
+            class="thumb-img"
+        >
+        {% else %}
+        <div class="thumb-placeholder">
+            {% if item.file_type == "video" %}&#9654;{% else %}&#128444;{% endif %}
+        </div>
+        {% endif %}
+        <span class="thumb-label" title="{{ item.filename }}">{{ item.filename }}</span>
+        {% if item.file_type == "video" %}
+        <span class="badge badge-video">VIDEO</span>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p>Album not found.</p>
+<a href="/" class="back-link">&laquo; Back to search</a>
+{% endif %}
+{% endblock %}

@@ -1,4 +1,4 @@
-.PHONY: test test-verbose install-test-deps compile-dev-deps clean lint format lint-check help
+.PHONY: test test-verbose install-test-deps compile-dev-deps clean lint format lint-check help run-bunkr test-bunkr
 
 # Default target
 help:
@@ -43,6 +43,14 @@ lint-check:
 # Format code with ruff
 format:
 	ruff format
+
+# Run Bunkr UI server
+run-bunkr:
+	uvicorn src.bunkr_ui.app:create_app --factory --host 127.0.0.1 --port 8000 --reload
+
+# Run Bunkr UI tests only
+test-bunkr:
+	python -m pytest tests/bunkr_ui/ -v
 
 # Clean up test artifacts
 clean:
