@@ -1,0 +1,38 @@
+{% if results is not none %}
+    {% if results | length == 0 %}
+    <p class="no-results">No results found.</p>
+    {% else %}
+    <div class="results-list">
+        {% for result in results %}
+        <a href="/album/{{ result.album_id }}" class="result-card">
+            <h3 class="result-title">{{ result.title }}</h3>
+            {% if result.file_count %}
+            <span class="result-meta">{{ result.file_count }} files</span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if total_pages is defined and total_pages > 1 %}
+    <div class="pagination">
+        {% if current_page > 1 %}
+        <a href="/search?q={{ query | urlencode }}&page={{ current_page - 1 }}"
+           hx-get="/search?q={{ query | urlencode }}&page={{ current_page - 1 }}"
+           hx-target="#search-results"
+           hx-swap="innerHTML"
+           class="page-link">&laquo; Prev</a>
+        {% endif %}
+
+        <span class="page-info">Page {{ current_page }} of {{ total_pages }}</span>
+
+        {% if current_page < total_pages %}
+        <a href="/search?q={{ query | urlencode }}&page={{ current_page + 1 }}"
+           hx-get="/search?q={{ query | urlencode }}&page={{ current_page + 1 }}"
+           hx-target="#search-results"
+           hx-swap="innerHTML"
+           class="page-link">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endif %}
+{% endif %}

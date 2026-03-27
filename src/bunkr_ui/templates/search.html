@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Bunkr UI{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <form action="/search" method="get" class="search-form">
+        <div class="search-input-group">
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder='Search albums... try +must -exclude "exact phrase"'
+                class="search-input"
+                autofocus
+            >
+            <button type="submit" class="search-btn">Search</button>
+        </div>
+        <details class="syntax-help">
+            <summary>Search syntax help</summary>
+            <ul>
+                <li><code>+term</code> &mdash; must include this term</li>
+                <li><code>-term</code> &mdash; must exclude this term</li>
+                <li><code>"exact phrase"</code> &mdash; match exact phrase</li>
+                <li><code>term</code> &mdash; may include (results ranked by match count)</li>
+            </ul>
+            <p>Example: <code>+beach -amateur "summer 2024" vacation</code></p>
+        </details>
+    </form>
+
+    {% if error is defined and error %}
+    <div class="error-banner">{{ error }}</div>
+    {% endif %}
+
+    <div id="search-results">
+        {% include "search_results_partial.html" %}
+    </div>
+</div>
+{% endblock %}
